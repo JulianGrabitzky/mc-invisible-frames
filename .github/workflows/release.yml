@@ -57,8 +57,14 @@ jobs:
         run: |
           cd neoforge/build/libs
           sha256sum invisibleframes-*-neoforge.jar > SHA256SUMS
+          # Manual runs require a new tag. Create it atomically at the tested
+          # commit, so an existing tag can never receive a different build.
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            gh api --method POST "repos/$GH_REPO/git/refs" \
+              -f ref="refs/tags/$RELEASE_TAG" -f sha="$GITHUB_SHA" > /dev/null
+          fi
           gh release create "$RELEASE_TAG" invisibleframes-*-neoforge.jar SHA256SUMS \
-            --target "$GITHUB_SHA" \
+            --verify-tag \
             --prerelease \
             --title "Invisible Frames — NeoForge 1.21.1 ($RELEASE_TAG)" \
             --notes 'NeoForge 21.1.259+, Minecraft 1.21.1, Java 21. Build and all native GameTests passed. Real-client rendering and modpack integration remain to be verified. No Allay, Trove, or Fabric API required.'
