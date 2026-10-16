@@ -28,9 +28,10 @@ bin/
 
 *.DS_Store
 
-# fabric
+# Minecraft development and disposable GameTest worlds
 
 run/
+run-gametest/
 
 # Ignore Gradle project-specific cache directory
 .gradle

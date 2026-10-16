@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+issueTrackerURL="https://github.com/JulianGrabitzky/mc-invisible-frames/issues"
+
+[[mods]]
+modId="invisibleframes"
+version="${mod_version}"
+displayName="Invisible Frames"
+authors="Roundaround; NeoForge 1.21.1 backport by JulianGrabitzky"
+description='''Sneak and right-click a filled item frame to toggle its visibility.'''
+logoFile="assets/invisibleframes/icon.png"
+displayURL="https://github.com/JulianGrabitzky/mc-invisible-frames"
+
+[[mixins]]
+config="invisibleframes.mixins.json"
+
+[[dependencies.invisibleframes]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},21.2)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.invisibleframes]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+[features.invisibleframes]
+javaVersion="[21,)"
