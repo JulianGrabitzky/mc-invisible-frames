@@ -2,7 +2,7 @@
 
 Repository review: 2026-10-16, starting at commit `2e5fb7a`.
 
-Implementation is in progress on `t3/neoforge-port-roadmap`, the dedicated checkout for this backport; `main` retains the original revision. The agreed baseline is **Minecraft 1.21.1 / NeoForge 21.1.259 / Java 21**. CurseForge/Modrinth publishing remains postponed; GitHub release downloads are now authorized.
+The backport is merged into `main`. The screenshot supplied by the user identifies the actual pack loader as **NeoForge 21.1.257**, so version **2.0.2+1.21.1** now targets **Minecraft 1.21.1 / NeoForge 21.1.257 / Java 21**. The original 2.0.1 baseline was 21.1.259. CurseForge/Modrinth publishing remains postponed; GitHub release downloads are now authorized.
 
 ## Execution status
 
@@ -12,7 +12,7 @@ Implementation is in progress on `t3/neoforge-port-roadmap`, the dedicated check
 - Chapter 7: a separately installed packaged server boots successfully with the JAR. Two-client protocol checks were inconclusive because both tested protocol libraries failed to parse data; a no-mod NeoForge control reproduced the error. Actual modpack testing remains pending because no pack files/mod list were supplied. Client compatibility/rendering remains unverified.
 - Chapters 8–9: CurseForge/Modrinth publishing remains postponed. A separate GitHub release workflow now supports public JAR downloads after successful builds/tests. No third-party hosting credentials or platform projects were created.
 
-Artifact: `neoforge/build/libs/invisibleframes-2.0.1+1.21.1-neoforge.jar`.
+Artifact: `neoforge/build/libs/invisibleframes-2.0.2+1.21.1-neoforge.jar`.
 Commands and current installation instructions are in [README.md](README.md). Detailed evidence and remaining checks are in [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## Original repository snapshot (before the backport)
@@ -46,7 +46,7 @@ Complete steps 1–7 for a usable modpack build. Publishing in steps 8–9 is po
 
 ### 1. Establish the target and branch
 
-- [x] Record the user-approved initial baseline: NeoForge `21.1.259` and Java 21. Actual pack files and relevant interaction-mod list remain a chapter 7 prerequisite.
+- [x] Record the pack loader from the user screenshot: NeoForge `21.1.257` and Java 21 (supersedes the initial `21.1.259` baseline). Actual pack files and relevant interaction-mod list remain a chapter 7 prerequisite.
 - [x] Implement in the dedicated `t3/neoforge-port-roadmap` branch/checkout; the newer Minecraft line remains available on `main`.
 - [x] Start with NeoForge only on this branch. Adjust `settings.gradle.kts` so unrelated Fabric/Forge projects do not require their plugins or dependencies during configuration. Building just `:neoforge:build` does not automatically avoid configuring other included projects.
 - [x] Keep `invisibleframes` as the mod ID unless there is a concrete reason to change it. Document that the fork and original must not be installed together.

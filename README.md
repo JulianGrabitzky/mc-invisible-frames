@@ -7,7 +7,7 @@ including wall, floor, and ceiling placement. Normal insertion and rotation rema
 unchanged, and fixed frames and canceled NeoForge interaction events are respected.
 
 This branch backports [Roundaround's Invisible Frames](https://github.com/Roundaround/mc-invisible-frames)
-to **Minecraft 1.21.1**, using **NeoForge 21.1.259** and **Java 21**. It is a
+to **Minecraft 1.21.1**, using **NeoForge 21.1.257** and **Java 21**. It is a
 NeoForge-only branch; newer Minecraft and other loader implementations remain in
 upstream history. Publishing to CurseForge/Modrinth is postponed. Tested builds are available from
 [GitHub Releases](https://github.com/JulianGrabitzky/mc-invisible-frames/releases).
@@ -28,14 +28,17 @@ Without Nix, install a 64-bit JDK 21 and run the same Gradle wrapper command.
 The production artifact is:
 
 ```text
-neoforge/build/libs/invisibleframes-2.0.1+1.21.1-neoforge.jar
+neoforge/build/libs/invisibleframes-2.0.2+1.21.1-neoforge.jar
 ```
 
 Install the JAR into the NeoForge server's `mods/` directory (or your local
 NeoForge installation for single-player). No Fabric API, Allay, Trove, or other
 library mod is required. Do not install this fork alongside the original mod:
-they share the `invisibleframes` mod ID. The declared NeoForge minimum is 21.1.259;
+they share the `invisibleframes` mod ID. The declared NeoForge minimum is 21.1.257;
 older 21.1 builds have not been tested.
+
+The supported minimum is pinned separately as `neo_min_version`; changing
+`neo_version` for development/testing does not silently raise the JAR's requirement.
 
 `flake.nix` and `flake.lock` pin the development tools, including JDK 21.
 Use the checked-in Gradle wrapper, whose distribution has a SHA-256 check.

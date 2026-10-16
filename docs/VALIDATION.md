@@ -1,5 +1,28 @@
 # NeoForge 1.21.1 validation
 
+## 2.0.2 compatibility correction
+
+The user screenshot showed the actual pack running **NeoForge 21.1.257**, while
+2.0.1 incorrectly required 21.1.259. Version **2.0.2+1.21.1** builds/tests against
+21.1.257 and declares `[21.1.257,21.2)` in its packaged metadata. `neo_min_version`
+is separate from `neo_version`, so overriding the development loader does not
+raise the supported minimum.
+
+`nix develop --command ./gradlew clean build :neoforge:runGameTestServer --no-daemon`
+passed all **14 required GameTests on NeoForge 21.1.257**. The mod loaded
+successfully on that exact loader version; the production JAR was independently
+inspected for its version and dependency range. No feature-code changes were
+needed for the compatibility fix. The same 14 tests also pass with
+`-Pneo_version=21.1.259`; the JAR remains byte-identical and still declares the
+21.1.257 minimum after that override.
+
+Artifact: `neoforge/build/libs/invisibleframes-2.0.2+1.21.1-neoforge.jar`.
+SHA-256: `8139bc9c3b9904391fcc9170cdefbbe5944a16d4ac8b0dd6b0349f94b72fe47f`.
+
+The remaining graphical-client and actual-modpack checks below still apply.
+
+## Historical 2.0.1 validation
+
 Validated on 2026-10-16 using the pinned Nix environment on x86_64 Linux/WSL2:
 OpenJDK 21.0.12.1, Gradle 9.2.0, ModDevGradle 2.0.148,
 Minecraft 1.21.1, NeoForge 21.1.259.
@@ -96,5 +119,6 @@ passing automated tests. Before adding the JAR to the maintained pack, verify:
 - The packaged JAR runs in the single-player client, and the rendered item remains
   visible when its frame is hidden.
 
-No modpack files or mod list were supplied. NeoForge 21.1.259 is the user-approved
-baseline, rather than a verified description of the final pack.
+No modpack files or mod list were supplied. NeoForge 21.1.259 was the original
+baseline; the later screenshot confirmed the pack actually uses 21.1.257, which
+is the corrected 2.0.2 baseline above.

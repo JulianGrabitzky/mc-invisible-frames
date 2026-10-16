@@ -55,6 +55,11 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
+          NEO_MIN_VERSION=$(sed -n 's/^neo_min_version=//p' gradle.properties)
+          if [[ ! "$NEO_MIN_VERSION" =~ ^21\.1\.[0-9]+$ ]]; then
+            echo 'Invalid minimum NeoForge version in gradle.properties.' >&2
+            exit 1
+          fi
           cd neoforge/build/libs
           sha256sum invisibleframes-*-neoforge.jar > SHA256SUMS
           # Manual runs require a new tag. Create it atomically at the tested
@@ -67,7 +72,7 @@ jobs:
             --verify-tag \
             --prerelease \
             --title "Invisible Frames — NeoForge 1.21.1 ($RELEASE_TAG)" \
-            --notes 'NeoForge 21.1.259+, Minecraft 1.21.1, Java 21. Build and all native GameTests passed. Real-client rendering and modpack integration remain to be verified. No Allay, Trove, or Fabric API required.'
+            --notes "NeoForge ${NEO_MIN_VERSION}+, Minecraft 1.21.1, Java 21. Build and all native GameTests passed. Real-client rendering and modpack integration remain to be verified. No Allay, Trove, or Fabric API required."
 
       - name: Upload failure logs
         if: failure()
