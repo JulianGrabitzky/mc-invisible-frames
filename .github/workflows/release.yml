@@ -1,0 +1,74 @@
+name: Downloadable JAR release
+
+on:
+  push:
+    tags:
+      - 'neoforge-1.21.1-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'New release tag, starting with neoforge-1.21.1-'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^neoforge-1\.21\.1-[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
+            echo 'Release tag must start with neoforge-1.21.1- and contain only version characters.' >&2
+            exit 1
+          fi
+
+      - name: Set up Java 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@0f4528296b4bc09e8ae0fc7be30185a4ab435545 # v6.0.0
+
+      - name: Build and test
+        run: ./gradlew :neoforge:build :neoforge:runGameTestServer --no-daemon --stacktrace
+
+      - name: Create public prerelease with JAR and checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          cd neoforge/build/libs
+          sha256sum invisibleframes-*-neoforge.jar > SHA256SUMS
+          gh release create "$RELEASE_TAG" invisibleframes-*-neoforge.jar SHA256SUMS \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "Invisible Frames — NeoForge 1.21.1 ($RELEASE_TAG)" \
+            --notes 'NeoForge 21.1.259+, Minecraft 1.21.1, Java 21. Build and all native GameTests passed. Real-client rendering and modpack integration remain to be verified. No Allay, Trove, or Fabric API required.'
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: release-failure-reports
+          path: |
+            neoforge/build/reports/
+            neoforge/run-gametest/logs/
+          if-no-files-found: ignore

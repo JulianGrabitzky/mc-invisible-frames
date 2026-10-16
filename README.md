@@ -1,37 +1,96 @@
-![Invisible Frames](https://i.imgur.com/8hsV9XT.png)
+# Invisible Frames — NeoForge 1.21.1
 
-[![Modrinth Downloads](https://img.shields.io/modrinth/dt/invisible-frames-mod?style=flat&logo=modrinth&color=00AF5C)](https://modrinth.com/mod/invisible-frames-mod)
-[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1295518?style=flat&logo=curseforge&color=F16436)](https://www.curseforge.com/minecraft/mc-mods/rounds-invisible-frames)
-[![GitHub Repo stars](https://img.shields.io/github/stars/Roundaround/mc-invisible-frames?style=flat&logo=github)](https://github.com/Roundaround/mc-invisible-frames)
+Sneak and right-click a **filled** item frame to toggle the frame's visibility.
+The displayed item stays visible and does not rotate during the toggle. Removing
+that item makes the frame visible again. Regular and glow item frames are supported,
+including wall, floor, and ceiling placement. Normal insertion and rotation remain
+unchanged, and fixed frames and canceled NeoForge interaction events are respected.
 
-[![Support me on Ko-fi](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/donate/kofi-singular-alt_vector.svg)](https://ko-fi.com/roundaround)
+This branch backports [Roundaround's Invisible Frames](https://github.com/Roundaround/mc-invisible-frames)
+to **Minecraft 1.21.1**, using **NeoForge 21.1.259** and **Java 21**. It is a
+NeoForge-only branch; newer Minecraft and other loader implementations remain in
+upstream history. Publishing to CurseForge/Modrinth is postponed. Tested builds are available from
+[GitHub Releases](https://github.com/JulianGrabitzky/mc-invisible-frames/releases).
 
-Toggle invisibility on an item frame by sneaking as you right click it.
+## Build
 
-## Installing
-
-Grab a build from [Modrinth](https://modrinth.com/mod/invisible-frames-mod) or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/rounds-invisible-frames). Fabric builds need [Fabric API](https://modrinth.com/mod/fabric-api).
-
-## Building from source
+Install [Nix](https://nixos.org/download/) with `nix-command` and `flakes` enabled,
+then run:
 
 ```sh
+nix develop
 ./gradlew build
 ```
 
-Dev runs are per loader: `:fabric:runClient`, `:neoforge:runClient`, `:forge:runClient`, and the `runServer` equivalents. Game tests run with `./gradlew :fabric:runClientGameTests` and `:fabric:runServerGameTests`.
+Or run a single command with `nix develop --command ./gradlew build`.
+Without Nix, install a 64-bit JDK 21 and run the same Gradle wrapper command.
 
-The build is an [Allay](https://github.com/Roundaround/allay) consumer and bundles [Trove](https://github.com/Roundaround/trove).
+The production artifact is:
 
-Shared code lives in `common/` and is added to each loader subproject via `srcDir`.
+```text
+neoforge/build/libs/invisibleframes-2.0.1+1.21.1-neoforge.jar
+```
 
-## Contributing
+Install the JAR into the NeoForge server's `mods/` directory (or your local
+NeoForge installation for single-player). No Fabric API, Allay, Trove, or other
+library mod is required. Do not install this fork alongside the original mod:
+they share the `invisibleframes` mod ID. The declared NeoForge minimum is 21.1.259;
+older 21.1 builds have not been tested.
 
-Issues and pull requests are welcome at [the issue tracker](https://github.com/Roundaround/mc-invisible-frames/issues).
+`flake.nix` and `flake.lock` pin the development tools, including JDK 21.
+Use the checked-in Gradle wrapper, whose distribution has a SHA-256 check.
+Commit both flake files together; update the tool pin deliberately with
+`nix flake update nixpkgs`. For Nix installations without flakes enabled, add
+`--extra-experimental-features 'nix-command flakes'` to Nix commands.
+The development environment is pinned; this is not an offline or hermetic Nix
+build of Minecraft. The first Gradle run downloads Minecraft, NeoForge, and tools.
 
-- Branch from `main`, which tracks the newest supported Minecraft version. Older lines live on their own version-named branches.
-- Keep loader-agnostic code in `common/`; only genuinely loader-specific glue belongs in a loader subproject.
-- Run `./gradlew build` plus the Fabric game tests before opening a PR, and add a changelog entry under `changelogs/` named for the version you're targeting.
+## Test and develop
 
-## License
+```sh
+# Compilation and production JAR
+nix develop --command ./gradlew build
 
-[MIT](LICENSE)
+# Native NeoForge GameTests; exits unsuccessfully if a required test fails
+nix develop --command ./gradlew :neoforge:runGameTestServer
+
+# Interactive development runs
+nix develop --command ./gradlew :neoforge:runClient
+nix develop --command ./gradlew :neoforge:runServer
+```
+
+The GameTest task accepts the [Minecraft EULA](https://www.minecraft.net/eula)
+for its disposable world in `neoforge/run-gametest/`. Interactive server runs
+use a separate directory and require their own EULA acceptance.
+The Nix shell covers builds and headless server tests; running the graphical
+client also requires a working host display and graphics drivers.
+
+Tests live in `neoforge/src/gametest/`, run with a separate test mod, and are
+excluded from the production JAR. They exercise actual player/entity interactions,
+protection-event cancellation, frame types and orientations, item consumption,
+rotation, removal, NBT save/load, and vanilla entity-data updates. They do not
+replace checks in the actual modpack or visual checks with real game clients.
+
+GitHub Actions builds on pushes and pull requests, runs the GameTests, and uploads
+the production JAR under the run's **Artifacts** section (GitHub sign-in required).
+Failure logs are uploaded separately. Dependabot tracks pinned action revisions.
+
+For a public direct JAR download, open [GitHub Releases](https://github.com/JulianGrabitzky/mc-invisible-frames/releases)
+and download the `.jar` under **Assets**. The **Downloadable JAR release** workflow
+builds and tests before attaching the JAR and SHA-256 checksum to a prerelease.
+Trigger it by pushing a tag such as `neoforge-1.21.1-2.0.1`, or use **Run workflow**
+with a new tag after the workflow reaches the default branch. The built-in GitHub
+token is used only for GitHub release creation; no CurseForge/Modrinth credentials
+are configured. Existing releases are not overwritten by reruns.
+
+The feature mixin is in `common/src/main/`; NeoForge build configuration,
+entrypoint, metadata, and tests are in `neoforge/`.
+See [the TODO and validation status](TODO-NEOFORGE-1.21.1.md) for completed work and
+remaining modpack checks.
+
+## Credits and license
+
+Original mod by Evan Steinkerchner (Roundaround). NeoForge 1.21.1 backport maintained
+in [this repository](https://github.com/JulianGrabitzky/mc-invisible-frames).
+Licensed under [MIT](LICENSE); the original copyright notice is retained in the
+source and packaged JAR.
